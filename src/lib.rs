@@ -1,10 +1,12 @@
+mod types;
+
 use anyhow::Result;
-use common_types as types;
 use geo::prelude::*;
 use nalgebra as na;
 use noisy_float::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::{borrow::Borrow, fs, io::prelude::*};
+use types::BBox3D;
 
 unzip_n::unzip_n!(2);
 
@@ -21,7 +23,7 @@ pub fn get_rotated_bbox3d(
     points: impl IntoIterator<Item = impl Borrow<na::Point3<f64>>>,
     cluster_id: usize,
     config: impl AsRef<BBox3DConfig>,
-) -> Result<types::BBox3D> {
+) -> Result<BBox3D> {
     let bbox3d_config = config.as_ref();
 
     let data = points
@@ -217,10 +219,7 @@ pub fn get_rotated_bbox3d(
         let line: Vec<_> = (0..4)
             .map(|idx| (vertex[idx], vertex[(idx + 1) % 4]))
             .map(|((x1, y1), (x2, y2))| {
-                geo::Line::new(
-                    geo::Coordinate { x: x1, y: y1 },
-                    geo::Coordinate { x: x2, y: y2 },
-                )
+                geo::Line::new(geo::Coord { x: x1, y: y1 }, geo::Coord { x: x2, y: y2 })
             })
             .collect();
         line.iter()
@@ -311,18 +310,13 @@ pub fn get_rotated_bbox3d(
     .sqrt();
     let size_z = z_max - z_min;
 
-    Ok(types::BBox3D {
+    Ok(BBox3D {
         center_x,
         center_y,
         center_z,
         size_x,
         size_y,
         size_z,
-        rotation: Some(types::protobuf_types::UnitQuaternion {
-            x: rotation.i,
-            y: rotation.j,
-            z: rotation.k,
-            w: rotation.w,
-        }),
+        rotation,
     })
 }

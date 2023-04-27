@@ -3,10 +3,13 @@ name = "bbox3d-estimator"
 version = "0.1.0"
 edition = "2021"
 
+license-file = "LICENSE.en.txt"
+description = "This library can estimate a 3D bounding box given a set of 3D points by Rotating Caliper algorithm"
+repository = "https://github.com/NEWSLabNTU/bbox3d-estimator.git"
+
 [dependencies]
 nalgebra = "0.30.1"
 anyhow = "1.0.58"
-common-types = { version = "0.1.0", path = "../common-types" }
 serde = { version = "1.0.140", features = ["derive"] }
 noisy_float = { version = "0.2.0", features = ["serde"] }
 unzip-n = "0.1.2"
