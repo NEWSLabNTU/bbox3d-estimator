@@ -3,17 +3,17 @@ use std::f64::consts::PI;
 #[derive(Debug, Clone)]
 pub struct Caliper {
     pub convex_hull: Vec<geo::Point<f64>>,
-    pub current_index: usize,
-    pub current_angle: f64,
+    pub index: usize,
+    pub angle: f64,
 }
 
 impl Caliper {
     pub fn rotate(&mut self, angle: f64) {
         if angle == self.rotate_to_next() {
             let size = self.convex_hull.len();
-            self.current_index = (self.current_index + 1) % size;
+            self.index = (self.index + 1) % size;
         }
-        self.current_angle += angle;
+        self.angle += angle;
     }
 
     pub fn x(&self) -> f64 {
@@ -25,28 +25,29 @@ impl Caliper {
     }
 
     pub fn slope(&self) -> f64 {
-        self.current_angle.tan()
+        self.angle.tan()
     }
 
     // Return the angle needed to be rotated from current angle to next angle
     pub fn rotate_to_next(&self) -> f64 {
         let size = self.convex_hull.len();
-        let next_idx = (self.current_index + 1) % size;
+        let next_idx = (self.index + 1) % size;
         let angle = {
             let point = &self.convex_hull[next_idx];
             let t = (point.y() - self.y()).atan2(point.x() - self.x());
 
-            if t > 0.0 {
+            if t >= 0.0 {
                 t
             } else {
                 t + PI * 2.0
             }
         };
 
-        if angle > self.current_angle {
-            angle - self.current_angle
+        let diff = angle - self.angle;
+        if diff >= 0.0 {
+            diff
         } else {
-            angle - self.current_angle + (PI * 2.0)
+            diff + PI * 2.0
         }
     }
 
@@ -59,7 +60,7 @@ impl Caliper {
                     self.y() - target.y() - self.slope() * self.x() + target.slope() * target.x();
                 t / (target.slope() - self.slope())
             }
-            (false, false | true) => self.x(),
+            (false, _) => self.x(),
             (true, false) => target.x(),
         };
         let y = match (m1 == 0.0, m2 == 0.0) {
@@ -70,13 +71,13 @@ impl Caliper {
                     target.y() + target.slope() * (x - target.x())
                 }
             }
-            (true, false | true) => self.y(),
+            (true, _) => self.y(),
             (false, true) => target.y(),
         };
         (x, y)
     }
 
     fn current_point(&self) -> &geo::Point<f64> {
-        &self.convex_hull[self.current_index]
+        &self.convex_hull[self.index]
     }
 }
