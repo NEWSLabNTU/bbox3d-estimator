@@ -60,22 +60,22 @@ pub fn get_rotated_bbox3d(
 
     let mut top_caliper = Caliper {
         convex_hull: ch.clone(),
-        current_point: top,
+        current_index: top,
         current_angle: PI,
     };
     let mut bottom_caliper = Caliper {
         convex_hull: ch.clone(),
-        current_point: bottom,
+        current_index: bottom,
         current_angle: 0.0,
     };
     let mut right_caliper = Caliper {
         convex_hull: ch.clone(),
-        current_point: right,
+        current_index: right,
         current_angle: PI * 0.5,
     };
     let mut left_caliper = Caliper {
         convex_hull: ch.clone(),
-        current_point: left,
+        current_index: left,
         current_angle: PI * 1.5,
     };
 
