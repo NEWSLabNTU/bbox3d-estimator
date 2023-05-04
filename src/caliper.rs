@@ -1,3 +1,4 @@
+use approx::abs_diff_eq;
 use std::f64::consts::PI;
 
 #[derive(Debug, Clone)]
@@ -63,7 +64,7 @@ impl Caliper {
             (false, _) => self.x(),
             (true, false) => target.x(),
         };
-        let y = match (m1 == 0.0, m2 == 0.0) {
+        let y = match (abs_diff_eq!(m1, 0.0), abs_diff_eq!(m2, 0.0)) {
             (false, false) => {
                 if m1.is_finite() {
                     self.y() + self.slope() * (x - self.x())
