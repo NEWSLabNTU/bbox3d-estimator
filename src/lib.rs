@@ -5,32 +5,29 @@ use geo::{prelude::*, Coord, Line};
 use itertools::{izip, Itertools};
 use nalgebra as na;
 use noisy_float::prelude::*;
-use std::{
-    borrow::Borrow,
-    f64::consts::{FRAC_PI_2, PI},
-};
+use std::f64::consts::{FRAC_PI_2, PI};
 
 const EPSILON: f64 = 1e-6;
 
 #[derive(Debug, Clone)]
 pub struct BBox3D {
-    pub center_x: f64,
-    pub center_y: f64,
-    pub center_z: f64,
-    pub size_x: f64,
-    pub size_y: f64,
-    pub size_z: f64,
-    pub rotation: na::UnitQuaternion<f64>,
+    /// The center coordinates of the box in `[x, y, z]`.
+    pub center: [f64; 3],
+
+    /// The extent of the box. The first element corresponds to the
+    /// extent along the X-axis if the box is not rotated.
+    pub extent: [f64; 3],
+
+    /// The quaternion of 3D box stored in `[i, j, k, w]` order.
+    pub rotation: [f64; 4],
 }
 
 /// Fit a rotated 3D box on a set of points.
-pub fn get_rotated_bbox3d(
-    points: impl IntoIterator<Item = impl Borrow<na::Point3<f64>>>,
-) -> Option<BBox3D> {
+pub fn get_rotated_bbox3d(points: impl IntoIterator<Item = [f64; 3]>) -> Option<BBox3D> {
     let (points3d, points2d): (Vec<na::Point3<f64>>, Vec<geo::Point>) = points
         .into_iter()
-        .map(|point3d| {
-            let point3d = *point3d.borrow();
+        .map(|[x, y, z]| {
+            let point3d = na::Point3::new(x, y, z);
             let point2d = geo::Point::new(point3d.x, point3d.y);
             (point3d, point2d)
         })
@@ -172,13 +169,9 @@ pub fn get_rotated_bbox3d(
     let size_z = z_range;
 
     Some(BBox3D {
-        center_x,
-        center_y,
-        center_z,
-        size_x,
-        size_y,
-        size_z,
-        rotation,
+        center: [center_x, center_y, center_z],
+        extent: [size_x, size_y, size_z],
+        rotation: rotation.coords.into(),
     })
 }
 
